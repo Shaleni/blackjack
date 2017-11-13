@@ -14,15 +14,15 @@ cards <- rep(cards,6)
 #shuffles cards in the vector
 #returns a vector that is a subset of shuffled original deck
 #based on the termination card number
-shuffleCards <- function(c){
+shuffleCards <- function(x){
   #set.seed(6324)
   #shuffle deck
-  c<-cards
-  c <- sample(c,length(c),replace=F)
+  #c<-cards
+  cards <- sample(x,length(x),replace=F)
   #pick termination number
   terminate <- trunc(runif(1,218,250))
   #return subset deck to use in session
-  return(list(c,terminate))
+  return(list(x,terminate))
 }
 
 ###################################
