@@ -10,6 +10,6 @@ shuffleCards <- function(x){
   #pick termination number
   terminate <- trunc(runif(1,218,250))
   #return subset deck to use in session
-  return(list(x,terminate))
+  return(list(cards,terminate))
 }
 

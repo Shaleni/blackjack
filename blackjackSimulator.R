@@ -52,12 +52,30 @@ cards <- rep(cards,6)
 #######################
 ######Simulations######
 #######################
-s1 <- function(results,deck,terminate){
+#strategy = 1: base strategy
+#strategy = 7: splitting
+#strategy = 13: splitting and doubling down
+s1 <- function(results,deck,terminate, strategy){
+  if(strategy==1){
+    #play with split flag
+    pws = F
+    dDown = F
+    splitWithAce=F
+  } else if (strategy==7){
+    pws=T
+    dDown=F
+    splitWithAce=F
+  } else{
+    pws=T
+    dDown=T
+    splitWithAce=F
+  }
+  
   totalBet<-0
   
   counter <- 1
   #deal first card to player and dealer
-  playerS1(deck[counter],T)
+  p<-playerS1(deck[counter],T)
   counter <- counter + 1
   dealer(deck[counter],T)
   counter <- counter + 1
@@ -65,25 +83,81 @@ s1 <- function(results,deck,terminate){
   #go through the deck, last game is with the termination card
   while(counter<=terminate){
     totalBet <- totalBet +1
+    #split hand flag
+    split=F
+    splitWithAce=F
     
-    #deal second card to player and dealer
-    p<-playerS1(deck[counter],F)
-    counter <- counter + 1
-    d<-dealer(deck[counter],F)
-    counter <- counter + 1
-    
-    #finish hands of player and dealer
-    while(!(p[[2]])){
+    #if playing with a split hand, check next card for possible split before dealing it
+    if(pws){
+      
+      if(names(deck[counter])==names(p[[1]]) && p[[1]]!=5 && p[[1]]!=10){
+        #split the deck
+        split=T
+        totalBet <- totalBet +1
+        p2<-playerS1Split(deck[counter],T)
+        
+        #check for aces
+        if(names(deck[counter])=="A"){
+          #set ace value to 11
+          playerCards[1]<<-11
+          playerCardsSplit[1]<<-11
+          splitWithAce=T
+        }
+        counter <- counter + 1
+        #deal second card to player hands and dealer
+        p<-playerS1(deck[counter],F)
+        counter <- counter + 1
+        p2<-playerS1Split(deck[counter],F)
+        counter <- counter + 1
+        d<-dealer(deck[counter],F)
+        counter <- counter + 1
+        
+      } else{
+        #no split, play normally
+        #deal second card to player and dealer
+        p<-playerS1(deck[counter],F)
+        counter <- counter + 1
+        d<-dealer(deck[counter],F)
+        counter <- counter + 1
+      }
+    } else{
+      #not playing with splitting
+      #deal second card to player and dealer
       p<-playerS1(deck[counter],F)
       counter <- counter + 1
+      d<-dealer(deck[counter],F)
+      counter <- counter + 1
     }
+
+    #finish hand(s) of player
+    if(!splitWithAce){
+      #original hand
+      while(!(p[[2]])){
+        p<-playerS1(deck[counter],F)
+        counter <- counter + 1
+      }
+      #if there is also a split hand
+      if(split){
+        while(!(p2[[2]])){
+          p2<-playerS1Split(deck[counter],F)
+          counter <- counter + 1
+        }
+      }
+    }
+  
+    #finish hand of dealer
     while(!unlist(d[2])){
       d<-dealer(deck[counter],F)
       counter <- counter + 1
     }
     #get the results of the game
-    r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
-    results <- results+r
+    if(split){
+      r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
+      results <- results+r
+    } else{
+      r<-checkForWinner(unlist(p[1]),unlist(d[1]))
+      results <- results+r
+    }
     
     #deal first card of next game to player and dealer
     p<-playerS1(deck[counter],T)
@@ -120,17 +194,17 @@ runSimulations <- function(x){
   
   results<-(cbind(numBlackJack,numOtherWin,numTie,numLoss,numBust,totalBet,amtLeft))
   
-  if(x==1){
-    results <- s1(results,deck,terminate)
+  if(x==1 || x==7){
+    results <- s1(results,deck,terminate, x)
   }
   
   
   return(results)
 }
 
-result <- runSimulations(1)
+result <- runSimulations(7)
 
-finalResults <- rowSums(sapply(1:2,function(i) sapply(X=runSimulations(1),FUN="+")))
+finalResults <- rowSums(sapply(1:2,function(i) sapply(X=runSimulations(7),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 
