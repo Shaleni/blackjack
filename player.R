@@ -25,19 +25,19 @@ playerS1 <- function(card, reset){
   #only time ace would be 11
   if(length(which(playerCards==-1))==1 && length(which(playerCards>=6))==1){
     #set ace to 11
-    playerCards[which(playerCards==-1)] <- 11
+    playerCards[which(playerCards==-1)] <<- 11
   }else {
     #handle aces
     #set aces to 1
     #otherwise have 11 or 12 and won't hit
     if(length(which(playerCards==-1))>=1){
       #set aces to 1
-      playerCards[which(playerCards==-1)] <- 1
+      playerCards[which(playerCards==-1)] <<- 1
     } 
   }
   #check if busted and still have an ace that's 11 - change ace that was 11 to 1
   if(sum(playerCards)>21 && length(which(playerCards==11))==1){
-    playerCards[which(playerCards==11)] <- 1
+    playerCards[which(playerCards==11)] <<- 1
   }
   return(list(playerCards,sum(playerCards)>=11))
 }
@@ -58,19 +58,19 @@ playerS1Split <- function(card, reset){
   #only time ace would be 11
   if(length(which(playerCardsSplit==-1))==1 && length(which(playerCardsSplit>=6))==1){
     #set ace to 11
-    playerCardsSplit[which(playerCardsSplit==-1)] <- 11
+    playerCardsSplit[which(playerCardsSplit==-1)] <<- 11
   }else {
     #handle aces
     #set aces to 1
     #otherwise have 11 or 12 and won't hit
     if(length(which(playerCardsSplit==-1))>=1){
       #set aces to 1
-      playerCardsSplit[which(playerCardsSplit==-1)] <- 1
+      playerCardsSplit[which(playerCardsSplit==-1)] <<- 1
     } 
   }
   #check if busted and still have an ace that's 11 - change ace that was 11 to 1
   if(sum(playerCardsSplit)>21 && length(which(playerCardsSplit==11))==1){
-    playerCardsSplit[which(playerCardsSplit==11)] <- 1
+    playerCardsSplit[which(playerCardsSplit==11)] <<- 1
   }
   return(list(playerCardsSplit,sum(playerCardsSplit)>=11))
 }

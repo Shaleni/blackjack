@@ -60,15 +60,12 @@ s1 <- function(results,deck,terminate, strategy){
     #play with split flag
     pws = F
     dDown = F
-    splitWithAce=F
   } else if (strategy==7){
     pws=T
     dDown=F
-    splitWithAce=F
   } else{
     pws=T
     dDown=T
-    splitWithAce=F
   }
   
   totalBet<-0
@@ -146,7 +143,7 @@ s1 <- function(results,deck,terminate, strategy){
     }
   
     #finish hand of dealer
-    while(!unlist(d[2])){
+    while(!d[[2]]){
       d<-dealer(deck[counter],F)
       counter <- counter + 1
     }
@@ -155,7 +152,7 @@ s1 <- function(results,deck,terminate, strategy){
       r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
       results <- results+r
     } else{
-      r<-checkForWinner(unlist(p[1]),unlist(d[1]))
+      r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
       results <- results+r
     }
     
@@ -202,7 +199,6 @@ runSimulations <- function(x){
   return(results)
 }
 
-result <- runSimulations(7)
 
 finalResults <- rowSums(sapply(1:2,function(i) sapply(X=runSimulations(7),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")

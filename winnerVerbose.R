@@ -89,7 +89,7 @@ checkForWinnerVerbose<-function(playerCards,dealerCards,splitPlayerCards){
       cat("Sending hand 2 to checkforwinnerverbose\n")
       checkForWinnerVerbose(splitPlayerCards,dealerCards)
     }
-    
+    return(cbind(numBlackJack,numOtherWin,numTie,numLoss,numBust,totalBet,amtLeft))
   }
   
   
