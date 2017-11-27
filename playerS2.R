@@ -1,0 +1,39 @@
+# Player functions
+# one function for each strategy
+# Takes a card to add to the hand, and a boolean to create a new hand
+# Returns a list containing the player's hand, and boolean if the player is standing
+
+
+######################
+######Strategy 2######
+######################
+#Always play to > 16, if total is 17 or more,
+#stand, else take a card. Dealer's rule
+
+playerS2 <- function(card, reset) {
+	#init/reset card vector
+	if(reset) {
+		playerCards <<- vector()
+	}
+
+	# check for 21, to hit, or to stand
+	# you might bust here, only hit when <= 16
+	#account for if an ace is valued at 11
+	playerCards <<- append(playerCards, card)
+
+	#only want ace to equal 11 if card is 6 or less
+	if(length(which(playerCards == -1)) == 1) {
+		#1st ace in hand: valued 11
+		#additional aces: valued 1
+		if(length(which(playerCards == 11)) == 1) {
+			playerCards[which(playerCards == -1)] <- 1 #assign value of 1
+		} else {
+			playerCards[which(playerCards == -1)] <- 11 #assign 11 to ace
+		}	
+	}
+	#check if busted & have an ace that is valued at 11, if so then change value to 1
+	if(sum(playerCards) > 21 && length(which(playerCards == 11)) == 1) {
+		playerCards[which(playerCards == 11)] <- 1
+	}
+	return(list(playerCards, sum(playerCards) > 16))
+}
