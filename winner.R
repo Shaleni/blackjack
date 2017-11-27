@@ -56,8 +56,19 @@ checkForWinner<-function(playerCards,dealerCards,splitPlayerCards){
     #check each hand for an ace and a 10 value; this combination will only win the bet amount
     #rather than the normal 1 1/2 times
     #otherwise, call checkForWinner with each hand and return the combined result
-    
-    
+    if(playerCards[1]==11 && sum(playerCards)==21){
+      amtLeft <- amtLeft + 2
+      numBlackJack <- numBlackJack + 1
+    } else {
+      checkForWinner(playerCards,dealerCards)
+    }
+    if(splitPlayerCards[1]==11 && sum(splitPlayerCards)==21){
+      amtLeft <- amtLeft + 2
+      numBlackJack <- numBlackJack + 1
+    } else {
+      checkForWinner(splitPlayerCards,dealerCards)
+    }
+    return(cbind(numBlackJack,numOtherWin,numTie,numLoss,numBust,totalBet,amtLeft))
     
   }
   

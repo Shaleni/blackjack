@@ -149,10 +149,12 @@ s1 <- function(results,deck,terminate, strategy){
     }
     #get the results of the game
     if(split){
-      r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
+      r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
+      #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
       results <- results+r
     } else{
-      r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
+      r<-checkForWinner(unlist(p[1]),unlist(d[1]))
+      #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
       results <- results+r
     }
     
@@ -200,7 +202,7 @@ runSimulations <- function(x){
 }
 
 
-finalResults <- rowSums(sapply(1:2,function(i) sapply(X=runSimulations(7),FUN="+")))
+finalResults <- rowSums(sapply(1:10000,function(i) sapply(X=runSimulations(1),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 
