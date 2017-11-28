@@ -37,3 +37,4 @@ playerS4 <- function(card, reset) {
 	}
 	return(list(playerCards, sum(playerCards) > 17))
 }
+

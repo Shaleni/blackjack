@@ -1,7 +1,8 @@
 #blackjackSimulator.R
 #version of blackjack.R that uses different files for the functions
 
-setwd("C:/Users/shale_000/OneDrive/SMU/Fall2017/STAT 6324/blackjack")
+#setwd("C:/Users/shale_000/OneDrive/SMU/Fall2017/STAT 6324/blackjack")
+setwd("/Users/quincyschurr/Documents/blackjack")
 
 ######################
 ##Constant Functions##
@@ -34,6 +35,9 @@ source("winner.R")
 #args: card to add to hand, boolean (T-create new hand|F-add to existing hand)
 #returns: list(player's hand vector, boolean (T-player is standing|F-based on strategy))
 source("player.R")
+source("playerS2.R")
+source("playerS4.R")
+source("playerS5.R")
 
 #################
 ##Generate Deck##
@@ -169,6 +173,118 @@ s1 <- function(results,deck,terminate, strategy){
   return(results)
 }
 
+s2 <- function(results, deck, terminate, strategy) {
+  if(strategy==2) {
+    #play with split flag - don't have these implemented for S2 yet
+    pws = F
+    dDown = F
+  } else if (strategy==8) { #want to play S2 with split
+    pws = T
+    dDown = F
+  } else {#means playing with double down
+    pws = T
+    dDown = T
+  }
+
+  totalBet <- 0
+  counter <- 1
+  #deal first card to player and dealer
+  p <- playerS2(deck[counter], T)
+  counter <- counter + 1
+  dealer(deck[counter], T)
+  counter <- counter + 1
+
+  #iterate through deck, last game is with the termination card
+  while(counter <= terminate) {
+    totalBet <- totalBet + 1
+    #split the hand flags
+    split = F
+    splitWithAce = F
+
+    #if playing with a split hand, check next card for possible split before dealing
+    if(pws) {
+      if(names(deck[counter]) == names(p[[1]]) && p[[1]] != 5 && p[[1]] != 10) {
+        #now can split deck
+        split = T
+        totalBet <- totalBet + 1
+        p2 <-playerS2Split(deck[counter], T)
+
+        #check for aces
+        if(names(deck[counter]) == "A"){
+          #now set ace value to 11
+          playerCards[1] <<- 11
+          playerCardsSplit[1] <<- 11
+          splitWithAce = T
+        }
+        counter <- counter + 1
+        #now deal a second card to player and dealer
+        p <- playerS2(deck[counter], F)
+        counter <- counter + 1
+        p2 <- playerS2Split(deck[counter], F)
+        counter <- counter + 1
+        d <- dealer(deck[counter], F)
+        counter <- counter + 1
+      } else {
+        #there is no split and play continues as normal
+        #deal second card to player and dealer
+        p <- playerS2(deck[counter], F)
+        counter <- counter + 1
+        d <- dealer(deck[counter], F)
+        counter <- counter + 1
+      }
+    } else {
+      #not playing with a split
+      #deal second card
+      p <- playerS2(deck[counter], F)
+      counter <- counter + 1
+      d <- dealer(deck[counter], F)
+      counter <- counter + 1
+    }
+
+    #finish hand(s) of the player
+    if(!splitWithAce) {
+      #original hand
+      while(!(p[[2]])) {
+        p <- playerS2(deck[counter], F)
+        counter <- counter + 1
+      }
+      #if there is also a split hand
+      if(split) {
+        while(!(p2[[2]])) {
+          p2 <- playerS2Split(deck[counter], F)
+          counter <- counter + 1
+        }
+      }
+    }
+
+    #finish dealer hand
+    while(!d[[2]]) {
+      d <- dealer(deck[counter], F)
+      counter <- counter + 1
+    }
+
+    #get results of game
+    if(split) {
+      r <- checkForWinner(unlist(p[1]), unlist(d[1]), p2[[1]])
+      #r <- checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
+      results <- results + r
+    } else {
+      r <- checkForWinner(unlist(p[1]), unlist(d[1]))
+      #r <- checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
+      results <- results + r
+    }
+
+    #deal first card of next game to player and dealer
+    p <- playerS2(deck[counter], T)
+    counter <- counter + 1
+    d <- dealer(deck[counter], T)
+    counter <- counter + 1
+  }
+
+  results[6] <- totalBet
+  return(results)
+}
+
 #######################
 ##Running Simulations##
 #######################
@@ -195,6 +311,12 @@ runSimulations <- function(x){
   
   if(x==1 || x==7){
     results <- s1(results,deck,terminate, x)
+  } else if (x==2) {
+    results <- s2(results,deck,terminate, x)
+  } else if (x==4) {
+    results <- s4(results,deck,terminate, x)
+  } else if (x==5) {
+    results <- s5(results,deck,terminate, x)
   }
   
   
@@ -202,7 +324,8 @@ runSimulations <- function(x){
 }
 
 
-finalResults <- rowSums(sapply(1:10000,function(i) sapply(X=runSimulations(1),FUN="+")))
+#finalResults <- rowSums(sapply(1:10000,function(i) sapply(X=runSimulations(1),FUN="+")))
+finalResults <- rowSums(sapply(1:10000,function(i) sapply(X=runSimulations(2),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 
