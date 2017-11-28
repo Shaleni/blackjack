@@ -2,6 +2,7 @@
 #version of blackjack.R that uses different files for the functions
 
 #setwd("C:/Users/shale_000/OneDrive/SMU/Fall2017/STAT 6324/blackjack")
+setwd("/Users/quincyschurr/Documents/blackjack")
 
 ######################
 ##Constant Functions##
@@ -573,12 +574,9 @@ runSimulations <- function(x){
 
 simRun <- 10000
 
-<<<<<<< HEAD
-finalResults <- rowSums(sapply(1:1,function(i) sapply(X=runSimulations(13),FUN="+")))
-=======
+
 cat("Running Strategy 1 \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(1),FUN="+")))
->>>>>>> master
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")
