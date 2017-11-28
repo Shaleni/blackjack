@@ -47,7 +47,7 @@ playerS4Split <- function(card, reset){
 	}
 
 	# check for 21, to hit, or to stand
-	# you might bust here, only hit when <= 16
+	# you might bust here, only hit when <= 17
 	#account for if an ace is valued at 11
 	playerCardsSplit <<- append(playerCardsSplit, card)
 

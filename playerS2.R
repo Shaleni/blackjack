@@ -39,8 +39,6 @@ playerS2 <- function(card, reset) {
 }
 
 
-
-
 #strategy 2 with split hand
 playerS2Split <- function(card, reset){
 	#init/reset card vector
