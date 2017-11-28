@@ -538,11 +538,12 @@ runSimulations <- function(x){
   
   if(x==1 || x==7){
     results <- s1(results,deck,terminate, x)
-  } else if (x==2) {
+    results <- s1(results, deck, terminate, x)
+  } else if (x==2 || x==8) {
     results <- s2(results,deck,terminate, x)
-  } else if (x==4) {
+  } else if (x==4 || x==10) {
     results <- s4(results,deck,terminate, x)
-  } else if (x==5) {
+  } else if (x==5 || x==11) {
     results <- s5(results,deck,terminate, x)
   }
   
@@ -550,26 +551,53 @@ runSimulations <- function(x){
   return(results)
 }
 
+simRun <- 1000
+
 cat("Running Strategy 1 \n")
-finalResults <- rowSums(sapply(1:10000,function(i) sapply(X=runSimulations(1),FUN="+")))
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(1),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+
+cat("Running Strategy 1 with Splitting \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(7),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")
 
 cat("Running Strategy 2 \n")
-finalResults <- rowSums(sapply(1:10000,function(i) sapply(X=runSimulations(2),FUN="+")))
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(2),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 2 with Splitting \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(8),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")
 
 cat("Running Strategy 4 \n")
-finalResults <- rowSums(sapply(1:10000,function(i) sapply(X=runSimulations(4),FUN="+")))
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(4),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 4 with Splitting \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(10),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")
 
 cat("Running Strategy 5 \n")
-finalResults <- rowSums(sapply(1:10000,function(i) sapply(X=runSimulations(5),FUN="+")))
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(5),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 5 with Splitting \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(11),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")

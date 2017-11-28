@@ -71,7 +71,7 @@ playerS2Split <- function(card, reset){
   if(sum(playerCardsSplit)>21 && length(which(playerCardsSplit==11))==1){
     playerCardsSplit[which(playerCardsSplit==11)] <<- 1
   }
-  return(list(playerCardsSplit,sum(playerCardsSplit)>=11))
+  return(list(playerCardsSplit,sum(playerCardsSplit)> 16))
 }
 
 
