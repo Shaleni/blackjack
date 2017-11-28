@@ -1,8 +1,8 @@
 #blackjackSimulator.R
 #version of blackjack.R that uses different files for the functions
 
-#setwd("C:/Users/shale_000/OneDrive/SMU/Fall2017/STAT 6324/blackjack")
-setwd("/Users/quincyschurr/Documents/blackjack")
+setwd("C:/Users/shale_000/Documents/SMU/Fall2017/STAT 6324/blackjack")
+#setwd("/Users/quincyschurr/Documents/blackjack")
 
 ######################
 ##Constant Functions##
@@ -584,6 +584,12 @@ cat("\n")
 
 cat("Running Strategy 1 with Splitting \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(7),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 1 with Splitting and Doubling Down \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(13),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")
