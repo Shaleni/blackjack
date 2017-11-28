@@ -125,23 +125,44 @@ s1 <- function(results,deck,terminate, strategy){
       d<-dealer(deck[counter],F)
       counter <- counter + 1
     }
-
-    #finish hand(s) of player
-    if(!splitWithAce){
-      #original hand
-      while(!(p[[2]])){
+    #now have 2 cards in all hand(s)
+    #if doubling down, check before drawing any more cards
+    if (dDown){
+      #if the sum of the hand is 10 or 11, double the bet and only draw one card
+      if(sum(p[[1]])==11 || sum(p[[1]])==10){
+        #cat("doubled down: hand total",sum(p[[1]]),"\n")
+        totalBet <- totalBet + 1
         p<-playerS1(deck[counter],F)
         counter <- counter + 1
       }
-      #if there is also a split hand
+      #if split, need to check the other hand too
       if(split){
-        while(!(p2[[2]])){
+        if(sum(p2[[1]])==11 || sum(p2[[1]])==10){
+          #cat("doubled down on split hand: hand total",sum(p2[[1]]),"\n")
+          totalBet <- totalBet + 1
           p2<-playerS1Split(deck[counter],F)
           counter <- counter + 1
         }
       }
-    }
-  
+    } 
+      #finish hands as usual
+      #even if doubled down, with S1 will be >=11 so player hands will be standing
+      #finish hand(s) of player
+      if(!splitWithAce){
+        #original hand
+        while(!(p[[2]])){
+          p<-playerS1(deck[counter],F)
+          counter <- counter + 1
+        }
+        #if there is also a split hand
+        if(split){
+          while(!(p2[[2]])){
+            p2<-playerS1Split(deck[counter],F)
+            counter <- counter + 1
+          }
+        }
+      }
+    
     #finish hand of dealer
     while(!d[[2]]){
       d<-dealer(deck[counter],F)
@@ -149,12 +170,12 @@ s1 <- function(results,deck,terminate, strategy){
     }
     #get the results of the game
     if(split){
-      r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
-      #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
+      #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
+      r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
       results <- results+r
     } else{
-      r<-checkForWinner(unlist(p[1]),unlist(d[1]))
-      #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
+     # r<-checkForWinner(unlist(p[1]),unlist(d[1]))
+      r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
       results <- results+r
     }
     
@@ -193,7 +214,7 @@ runSimulations <- function(x){
   
   results<-(cbind(numBlackJack,numOtherWin,numTie,numLoss,numBust,totalBet,amtLeft))
   
-  if(x==1 || x==7){
+  if(x==1 || x==7 || x==13){
     results <- s1(results,deck,terminate, x)
   }
   
@@ -202,7 +223,7 @@ runSimulations <- function(x){
 }
 
 
-finalResults <- rowSums(sapply(1:10000,function(i) sapply(X=runSimulations(1),FUN="+")))
+finalResults <- rowSums(sapply(1:1,function(i) sapply(X=runSimulations(13),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 
