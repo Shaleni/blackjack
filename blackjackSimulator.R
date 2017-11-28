@@ -174,12 +174,12 @@ s1 <- function(results,deck,terminate, strategy){
     }
     #get the results of the game
     if(split){
-      #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
-      r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
+      r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
+      #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
       results <- results+r
     } else{
-     # r<-checkForWinner(unlist(p[1]),unlist(d[1]))
-      r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
+      r<-checkForWinner(unlist(p[1]),unlist(d[1]))
+      #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
       results <- results+r
     }
     
