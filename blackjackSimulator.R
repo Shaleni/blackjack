@@ -551,7 +551,7 @@ runSimulations <- function(x){
   return(results)
 }
 
-simRun <- 1000
+simRun <- 10000
 
 cat("Running Strategy 1 \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(1),FUN="+")))
