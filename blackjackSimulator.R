@@ -569,7 +569,7 @@ runSimulations <- function(x){
   
   if(x==1 || x==7 || x==13){
     results <- s1(results,deck,terminate, x)
-    results <- s1(results, deck, terminate, x)
+    #results <- s1(results, deck, terminate, x)
   } else if (x==2 || x==8) {
     results <- s2(results,deck,terminate, x)
   } else if (x==4 || x==10) {
