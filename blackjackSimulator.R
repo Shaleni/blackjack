@@ -65,8 +65,8 @@ s1 <- function(results,deck,terminate, strategy){
     pws = F
     dDown = F
   } else if (strategy==7){
-    pws=T
-    dDown=F
+    pws=F
+    dDown=T
   } else{
     pws=T
     dDown=T
@@ -592,7 +592,7 @@ finalResults
 cat("\n")
 
 
-cat("Running Strategy 1 with Splitting \n")
+cat("Running Strategy 1 with Doubling Down \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(7),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
