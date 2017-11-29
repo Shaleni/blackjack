@@ -63,7 +63,17 @@ playerS3 <- function(dealerCards, playerCards, deck) {
   }
   return(list(playerCards, deck))
 }
-
+#######################
+######Strategy6########
+#######################
+playerS6 <- function(dealerCards, playerCards, deck){
+  if(dealerCards[1] %in% c(3:6)){
+    return(playerS1(playerCards, deck))
+    
+  } else {
+    return(playerS2(playerCards, deck))
+  }
+}
 #######################
 ######Simulations######
 #######################
