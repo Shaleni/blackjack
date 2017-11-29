@@ -2,7 +2,7 @@
 # Takes the player's hand, the dealer's hand, split hand (optional)
 # Returns a list containing the dealer's hand, and boolean if the dealer is standing
 
-checkForWinnerVerbose<-function(playerCards,dealerCards,splitPlayerCards){
+checkForWinnerVerbose<-function(playerCards,dealerCards,splitPlayerCards, doublingdown){
   #initalize values
   numBlackJack <- numOtherWin <- 0
   numTie <- numLoss<- numBust <-0
@@ -13,18 +13,38 @@ checkForWinnerVerbose<-function(playerCards,dealerCards,splitPlayerCards){
   dBust <- sum(dealerCards)>21
   pBlackjack <- sum(playerCards)==21
   dBlackjack <- sum(dealerCards)==21
-  
+
+  if(missing(doublingdown)){
+  	doublingdown=FALSE
+  }
+
+  doubleResult = F
+  #check if need to award double cost or nt or not
+  if(doublingdown){
+  	 if(playerCards[1]+playerCards[2]==10 || playerCards[1]+playerCards[2]==11){
+  	doubleResult=T
+  	}
+  }
+ 
   #if it was not a split hand, run as normal
   if(missing(splitPlayerCards)){
     #Determine winner and assign money
     #if player is bust, loses money
     if(pBust){
       amtLeft <- amtLeft - 1
+      if(doubleResult){
+      	cat("doubling down\n")
+      	amtLeft <- amtLeft - 1
+      }
       numBust <- numBust +1
       cat("Player Busted with",sum(playerCards), "try again\n")
     } else if (dBlackjack){
       if (!pBlackjack){
         amtLeft <- amtLeft - 1
+        if(doubleResult){
+        	cat("doubling down\n")
+        	amtLeft <- amtLeft - 1
+        }
         numLoss <- numLoss +1
         cat("House got blackjack, player had",sum(playerCards),"\nTry again\n")
       } else{
@@ -35,16 +55,28 @@ checkForWinnerVerbose<-function(playerCards,dealerCards,splitPlayerCards){
     } else if (pBlackjack){
       #player wins
       amtLeft <- amtLeft + 2.5
+      if(doubleResult){
+      	cat("doubling down\n")
+      	amtLeft <- amtLeft + 2.5
+      }
       numBlackJack <- numBlackJack + 1
       cat("Player got Blackjack!!! House had",sum(dealerCards),"\nCongrats!\n")
     } else if (dBust){
       #player wins
       amtLeft <- amtLeft + 2
+      if(doubleResult){
+      	cat("doubling down\n")
+      	amtLeft <- amtLeft + 2
+      }
       numOtherWin <- numOtherWin + 1
       cat("House busted with",sum(dealerCards),"\nYou had",sum(playerCards),"! Congrats!\n")
     } else if (sum(playerCards)>sum(dealerCards)){
       #player wins
       amtLeft <- amtLeft + 2
+      if(doubleResult){
+      	cat("doubling down\n")
+      	amtLeft <- amtLeft + 2
+      }
       numOtherWin <- numOtherWin + 1
       cat("Player beat house,",sum(playerCards)," to ",sum(dealerCards),"\n")
     } else if (sum(playerCards)==sum(dealerCards)){
@@ -54,6 +86,10 @@ checkForWinnerVerbose<-function(playerCards,dealerCards,splitPlayerCards){
     }else{
       #player loses
       amtLeft <- amtLeft - 1
+      if(doubleResult){
+      	cat("doubling down\n")
+      	amtLeft <- amtLeft - 1
+      }
       numLoss <- numLoss + 1
       cat("House beat player, ",sum(dealerCards)," to ",sum(playerCards),"\n")
     }
@@ -79,7 +115,11 @@ checkForWinnerVerbose<-function(playerCards,dealerCards,splitPlayerCards){
       numBlackJack <- numBlackJack + 1
     } else {
       cat("Sending hand 1 to checkforwinnerverbose\n")
-      checkForWinnerVerbose(playerCards,dealerCards)
+      if(doublingdown){
+      	checkForWinnerVerbose(playerCards,dealerCards, doublingdown=TRUE)
+      } else{
+      	checkForWinnerVerbose(playerCards,dealerCards)
+      }
     }
     if(splitPlayerCards[1]==11 && sum(splitPlayerCards)==21){
       cat("Hand 2 blackjack\n")
@@ -87,7 +127,11 @@ checkForWinnerVerbose<-function(playerCards,dealerCards,splitPlayerCards){
       numBlackJack <- numBlackJack + 1
     } else {
       cat("Sending hand 2 to checkforwinnerverbose\n")
-      checkForWinnerVerbose(splitPlayerCards,dealerCards)
+      if(doublingdown){
+      	 checkForWinnerVerbose(splitPlayerCards,dealerCards, doublingdown=TRUE)
+      } else {
+      	 checkForWinnerVerbose(splitPlayerCards,dealerCards)
+      }
     }
     return(cbind(numBlackJack,numOtherWin,numTie,numLoss,numBust,totalBet,amtLeft))
   }
