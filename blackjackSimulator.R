@@ -939,7 +939,7 @@ s6 <- function(results, deck, terminate, strategy){
     if (dDown){
       #if the sum of the hand is 10 or 11, double the bet and only draw one card
       if(sum(p[[1]])==11 || sum(p[[1]])==10){
-        cat("doubled down: hand total",sum(p[[1]]),"\n")
+        #cat("doubled down: hand total",sum(p[[1]]),"\n")
         totalBet <- totalBet + 1
         p<-playerS6(deck[counter],F, useS1)
         counter <- counter + 1
@@ -948,7 +948,7 @@ s6 <- function(results, deck, terminate, strategy){
       #if split, need to check the other hand too
       if(split){
         if(sum(p2[[1]])==11 || sum(p2[[1]])==10){
-          cat("doubled down on split hand: hand total",sum(p2[[1]]),"\n")
+          #cat("doubled down on split hand: hand total",sum(p2[[1]]),"\n")
           totalBet <- totalBet + 1
           p2<-playerS6Split(deck[counter],F, useS1)
           counter <- counter + 1
@@ -985,11 +985,11 @@ s6 <- function(results, deck, terminate, strategy){
     #get the results of the game
     if(split){
       if(dDown){
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
       } else{
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
       }
       results <- results+r
     } else{
@@ -1057,7 +1057,7 @@ runSimulations <- function(x){
   return(results)
 }
 
-simRun <- 1
+simRun <- 100
 
 
 cat("Running Strategy 1 \n")
