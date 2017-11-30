@@ -1,8 +1,8 @@
 #blackjackSimulator.R
 #version of blackjack.R that uses different files for the functions
 
-setwd("C:/Users/shale_000/Documents/SMU/Fall2017/STAT 6324/blackjack")
-#setwd("/Users/quincyschurr/Documents/blackjack")
+#setwd("C:/Users/shale_000/Documents/SMU/Fall2017/STAT 6324/blackjack")
+setwd("/Users/quincyschurr/Documents/blackjack")
 
 ######################
 ##Constant Functions##
@@ -221,8 +221,7 @@ s2 <- function(results,deck,terminate, strategy){
     dDown=T
   }
   
-  totalBet<-0
-  
+  totalBet <- 0
   counter <- 1
   #deal first card to player and dealer
   p<-playerS2(deck[counter],T)
@@ -236,6 +235,8 @@ s2 <- function(results,deck,terminate, strategy){
     #split hand flag
     split=F
     splitWithAce=F
+    doubledDown = F 
+    doubledDownSplit = F 
     
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
@@ -253,6 +254,7 @@ s2 <- function(results,deck,terminate, strategy){
           playerCardsSplit[1]<<-11
           splitWithAce=T
         }
+
         counter <- counter + 1
         #deal second card to player hands and dealer
         p<-playerS2(deck[counter],F)
@@ -287,6 +289,7 @@ s2 <- function(results,deck,terminate, strategy){
         totalBet <- totalBet + 1
         p<-playerS2(deck[counter],F)
         counter <- counter + 1
+        doubledDown = T
       }
       #if split, need to check the other hand too
       if(split){
@@ -295,26 +298,31 @@ s2 <- function(results,deck,terminate, strategy){
           totalBet <- totalBet + 1
           p2<-playerS2Split(deck[counter],F)
           counter <- counter + 1
+          doubledDownSplit = T 
         }
       }
     } 
-      #finish hands as usual
-      #even if doubled down, with S1 will be >=11 so player hands will be standing
-      #finish hand(s) of player
-      if(!splitWithAce){
-        #original hand
+    #finish hands as usual
+    #even if doubled down, with S1 will be >=11 so player hands will be standing
+    #finish hand(s) of player
+    if(!splitWithAce){
+      #original hand
+      if(!doubledDown) {
         while(!(p[[2]])){
           p<-playerS2(deck[counter],F)
           counter <- counter + 1
         }
-        #if there is also a split hand
-        if(split){
+      }
+      #if there is also a split hand
+      if(split){
+        if(!doubledDownSplit) {
           while(!(p2[[2]])){
             p2<-playerS2Split(deck[counter],F)
             counter <- counter + 1
           }
         }
       }
+    }
     
     #finish hand of dealer
     while(!d[[2]]){
@@ -480,20 +488,20 @@ s3 <- function(results,deck,terminate,strategy){
     #get the results of the game
     if(split){
       if(dDown){
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
       } else{
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
       }
       results <- results+r
     } else{
       if(dDown){
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T)
       } else {
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]))
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]))
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
       }
       results <- results+r
     }
@@ -525,8 +533,7 @@ s4 <- function(results,deck,terminate, strategy){
     dDown=T
   }
   
-  totalBet<-0
-  
+  totalBet <- 0
   counter <- 1
   #deal first card to player and dealer
   p<-playerS4(deck[counter],T)
@@ -540,6 +547,8 @@ s4 <- function(results,deck,terminate, strategy){
     #split hand flag
     split=F
     splitWithAce=F
+    doubledDown = F 
+    doubledDownSplit = F 
     
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
@@ -557,6 +566,7 @@ s4 <- function(results,deck,terminate, strategy){
           playerCardsSplit[1]<<-11
           splitWithAce=T
         }
+
         counter <- counter + 1
         #deal second card to player hands and dealer
         p<-playerS4(deck[counter],F)
@@ -591,6 +601,7 @@ s4 <- function(results,deck,terminate, strategy){
         totalBet <- totalBet + 1
         p<-playerS4(deck[counter],F)
         counter <- counter + 1
+        doubledDown = T
       }
       #if split, need to check the other hand too
       if(split){
@@ -599,26 +610,31 @@ s4 <- function(results,deck,terminate, strategy){
           totalBet <- totalBet + 1
           p2<-playerS4Split(deck[counter],F)
           counter <- counter + 1
+          doubledDownSplit = T 
         }
       }
     } 
-      #finish hands as usual
-      #even if doubled down, with S1 will be >=11 so player hands will be standing
-      #finish hand(s) of player
-      if(!splitWithAce){
-        #original hand
+    #finish hands as usual
+    #even if doubled down, with S1 will be >=11 so player hands will be standing
+    #finish hand(s) of player
+    if(!splitWithAce){
+      #original hand
+      if(!doubledDown) {
         while(!(p[[2]])){
           p<-playerS4(deck[counter],F)
           counter <- counter + 1
         }
-        #if there is also a split hand
-        if(split){
+      }
+      #if there is also a split hand
+      if(split){
+        if(!doubledDownSplit) {
           while(!(p2[[2]])){
             p2<-playerS4Split(deck[counter],F)
             counter <- counter + 1
           }
         }
       }
+    }
     
     #finish hand of dealer
     while(!d[[2]]){
@@ -673,8 +689,7 @@ s5 <- function(results,deck,terminate, strategy){
     dDown=T
   }
   
-  totalBet<-0
-  
+  totalBet <- 0
   counter <- 1
   #deal first card to player and dealer
   p<-playerS5(deck[counter],T)
@@ -688,6 +703,8 @@ s5 <- function(results,deck,terminate, strategy){
     #split hand flag
     split=F
     splitWithAce=F
+    doubledDown = F 
+    doubledDownSplit = F 
     
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
@@ -705,6 +722,7 @@ s5 <- function(results,deck,terminate, strategy){
           playerCardsSplit[1]<<-11
           splitWithAce=T
         }
+
         counter <- counter + 1
         #deal second card to player hands and dealer
         p<-playerS5(deck[counter],F)
@@ -739,6 +757,7 @@ s5 <- function(results,deck,terminate, strategy){
         totalBet <- totalBet + 1
         p<-playerS5(deck[counter],F)
         counter <- counter + 1
+        doubledDown = T
       }
       #if split, need to check the other hand too
       if(split){
@@ -747,26 +766,31 @@ s5 <- function(results,deck,terminate, strategy){
           totalBet <- totalBet + 1
           p2<-playerS5Split(deck[counter],F)
           counter <- counter + 1
+          doubledDownSplit = T 
         }
       }
     } 
-      #finish hands as usual
-      #even if doubled down, with S1 will be >=11 so player hands will be standing
-      #finish hand(s) of player
-      if(!splitWithAce){
-        #original hand
+    #finish hands as usual
+    #even if doubled down, with S1 will be >=11 so player hands will be standing
+    #finish hand(s) of player
+    if(!splitWithAce){
+      #original hand
+      if(!doubledDown) {
         while(!(p[[2]])){
           p<-playerS5(deck[counter],F)
           counter <- counter + 1
         }
-        #if there is also a split hand
-        if(split){
+      }
+      #if there is also a split hand
+      if(split){
+        if(!doubledDownSplit) {
           while(!(p2[[2]])){
             p2<-playerS5Split(deck[counter],F)
             counter <- counter + 1
           }
         }
       }
+    }
     
     #finish hand of dealer
     while(!d[[2]]){
