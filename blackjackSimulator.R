@@ -1170,19 +1170,18 @@ names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","
 finalResults
 cat("\n")
 
-<<<<<<< HEAD
-cat("Running Strategy 6 \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(6),FUN="+")))
-=======
 cat("Running Strategy 5 with Doubling Down & Splitting \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(17),FUN="+")))
->>>>>>> master
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")
 
+cat("Running Strategy 6 \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(6),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
 
-<<<<<<< HEAD
 cat("Running Strategy 6 with Doubling Down \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(12),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
@@ -1195,5 +1194,3 @@ names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","
 finalResults
 cat("\n")
 
-=======
->>>>>>> master
