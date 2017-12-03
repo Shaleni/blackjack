@@ -588,7 +588,7 @@ s3 <- function(results,deck,terminate,strategy, cCards){
       if(sum(p[[1]])==11 || sum(p[[1]])==10){
         #cat("doubled down: hand total",sum(p[[1]]),"\n")
         gameBet <- gameBet*2
-        p<-playerS1(deck[counter],F)
+        p<-playerS3(deck[counter],F)
         countCard(deck[counter])
         counter <- counter + 1
         doubledDown = T
@@ -602,7 +602,7 @@ s3 <- function(results,deck,terminate,strategy, cCards){
           } else {
             gameBet <- gameBet*2
           }
-          p2<-playerS1Split(deck[counter],F)
+          p2<-playerS3Split(deck[counter],F)
           countCard(deck[counter])
           counter <- counter + 1
           doubledDownSplit = T
@@ -648,7 +648,7 @@ s3 <- function(results,deck,terminate,strategy, cCards){
       #not playing with counting cards, set tc to -1
       tc <- -1
     } else {
-      cat("true count: ",tc,"\n")
+      #cat("true count: ",tc,"\n")
       #update game bet, if necessary
       if (tc>-1){
         gameBet <- tc+2
@@ -675,26 +675,26 @@ s3 <- function(results,deck,terminate,strategy, cCards){
 
     if(split){
       if(dDown){
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
       } else{
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
       }
       results <- results+r
     } else{
       if(dDown){
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
       } else {
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]), tc=tc)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), tc=tc)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]), tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), tc=tc)
       }
       results <- results+r
     }
     
     #deal first card of next game to player and dealer
-    p<-playerS1(deck[counter],T)
+    p<-playerS3(deck[counter],T)
     countCard(deck[counter])
     counter <- counter + 1
     d<-dealer(deck[counter],T)
@@ -1320,7 +1320,7 @@ s6 <- function(results, deck, terminate, strategy, cCards){
       #not playing with counting cards, set tc to -1
       tc <- -1
     } else {
-      cat("true count: ",tc,"\n")
+      #cat("true count: ",tc,"\n")
       #update game bet, if necessary
       if (tc>-1){
         gameBet <- tc+2
@@ -1347,20 +1347,20 @@ s6 <- function(results, deck, terminate, strategy, cCards){
 
     if(split){
       if(dDown){
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
       } else{
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
       }
       results <- results+r
     } else{
       if(dDown){
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
       } else {
-        #r<-checkForWinner(unlist(p[1]),unlist(d[1]), tc=tc)
-        r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), tc=tc)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]), tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), tc=tc)
       }
       results <- results+r
     }
@@ -1425,7 +1425,7 @@ runSimulations <- function(x, cCards){
   return(results)
 }
 
-simRun <- 1
+simRun <- 100000
 
 
 cat("Running Strategy 1 \n")
