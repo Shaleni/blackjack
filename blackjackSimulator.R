@@ -1,8 +1,8 @@
 #blackjackSimulator.R
 #version of blackjack.R that uses different files for the functions
 
-#setwd("C:/Users/shale_000/Documents/SMU/Fall2017/STAT 6324/blackjack")
-setwd("/Users/quincyschurr/Documents/blackjack")
+setwd("C:/Users/shale_000/Documents/SMU/Fall2017/STAT 6324/blackjack")
+#setwd("/Users/quincyschurr/Documents/blackjack")
 
 ######################
 ##Constant Functions##
