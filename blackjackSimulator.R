@@ -1310,7 +1310,7 @@ runSimulations <- function(x, cCards){
   return(results)
 }
 
-simRun <- 1
+simRun <- 100000
 
 
 cat("Running Strategy 1 \n")
