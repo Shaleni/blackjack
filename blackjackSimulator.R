@@ -1,8 +1,8 @@
 #blackjackSimulator.R
 #version of blackjack.R that uses different files for the functions
 
-#setwd("C:/Users/shale_000/Documents/SMU/Fall2017/STAT 6324/blackjack")
-setwd("/Users/quincyschurr/Documents/blackjack")
+setwd("C:/Users/shale_000/Documents/SMU/Fall2017/STAT 6324/blackjack")
+#setwd("/Users/quincyschurr/Documents/blackjack")
 
 ######################
 ##Constant Functions##
@@ -497,7 +497,7 @@ s2 <- function(results,deck,terminate, strategy, cCards){
 #strategy = 3: base strategy
 #strategy = 9: doubling down
 #strategy = 15: splitting and doubling down
-s3 <- function(results,deck,terminate,strategy){
+s3 <- function(results,deck,terminate,strategy, cCards){
   if(strategy==3){
     #play with split flag
     pws = F
@@ -509,19 +509,25 @@ s3 <- function(results,deck,terminate,strategy){
     pws=T
     dDown=T
   }
+
+  #global vars for counting cards session
+  runningCount <<- 0
+  cardsDealt <<- 0
   
   totalBet<-0
   
   counter <- 1
   #deal first card to player and dealer
   p<-playerS3(deck[counter],T)
+  countCard(deck[counter])
   counter <- counter + 1
   d<-dealer(deck[counter],T)
+  countCard(deck[counter])
   counter <- counter + 1
   
   #go through the deck, last game is with the termination card
   while(counter<=terminate){
-    totalBet <- totalBet +1
+    gameBet <- 1
     #split hand flag
     split=F
     splitWithAce=F
@@ -534,8 +540,9 @@ s3 <- function(results,deck,terminate,strategy){
       if(names(deck[counter])==names(p[[1]]) && p[[1]]!=5 && p[[1]]!=10){
         #split the deck
         split=T
-        totalBet <- totalBet +1
+        gameBet <- gameBet +1
         p2<-playerS3Split(deck[counter],T)
+        countCard(deck[counter])
         
         #check for aces
         if(names(deck[counter])=="A"){
@@ -547,10 +554,13 @@ s3 <- function(results,deck,terminate,strategy){
         counter <- counter + 1
         #deal second card to player hands and dealer
         p<-playerS3(deck[counter],F)
+        countCard(deck[counter])
         counter <- counter + 1
         p2<-playerS3Split(deck[counter],F)
+        countCard(deck[counter])
         counter <- counter + 1
         d<-dealer(deck[counter],F)
+        countCard(deck[counter])
         counter <- counter + 1
         
       } else{
@@ -565,8 +575,10 @@ s3 <- function(results,deck,terminate,strategy){
       #not playing with splitting
       #deal second card to player and dealer
       p<-playerS3(deck[counter],F)
+      countCard(deck[counter])
       counter <- counter + 1
       d<-dealer(deck[counter],F)
+      countCard(deck[counter])
       counter <- counter + 1
     }
     #now have 2 cards in all hand(s)
@@ -575,8 +587,9 @@ s3 <- function(results,deck,terminate,strategy){
       #if the sum of the hand is 10 or 11, double the bet and only draw one card
       if(sum(p[[1]])==11 || sum(p[[1]])==10){
         #cat("doubled down: hand total",sum(p[[1]]),"\n")
-        totalBet <- totalBet + 1
-        p<-playerS1(deck[counter],F)
+        gameBet <- gameBet*2
+        p<-playerS3(deck[counter],F)
+        countCard(deck[counter])
         counter <- counter + 1
         doubledDown = T
       }
@@ -584,8 +597,13 @@ s3 <- function(results,deck,terminate,strategy){
       if(split){
         if(sum(p2[[1]])==11 || sum(p2[[1]])==10){
           #cat("doubled down on split hand: hand total",sum(p2[[1]]),"\n")
-          totalBet <- totalBet + 1
-          p2<-playerS1Split(deck[counter],F)
+          if(doubledDown){
+            gameBet <- (3/2)*gameBet
+          } else {
+            gameBet <- gameBet*2
+          }
+          p2<-playerS3Split(deck[counter],F)
+          countCard(deck[counter])
           counter <- counter + 1
           doubledDownSplit = T
         }
@@ -599,6 +617,7 @@ s3 <- function(results,deck,terminate,strategy){
         #while the sum of your hand is < dealer's first card+10
         while(sum(p[[1]])<(d[[1]][1]+10)){
           p<-playerS3(deck[counter],F)
+          countCard(deck[counter])
           counter <- counter + 1
         }
       }
@@ -607,6 +626,7 @@ s3 <- function(results,deck,terminate,strategy){
         if(!doubledDownSplit){
           while(sum(p2[[1]])<(d[[1]][1]+10)){
             p2<-playerS3Split(deck[counter],F)
+            countCard(deck[counter])
             counter <- counter + 1
           }
         }
@@ -616,33 +636,69 @@ s3 <- function(results,deck,terminate,strategy){
     #finish hand of dealer
     while(!d[[2]]){
       d<-dealer(deck[counter],F)
+      countCard(deck[counter])
       counter <- counter + 1
     }
     #get the results of the game
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    if(!cCards){
+      #not playing with counting cards, set tc to -1
+      tc <- -1
+    } else {
+      #cat("true count: ",tc,"\n")
+      #update game bet, if necessary
+      if (tc>-1){
+        gameBet <- tc+2
+        #account for splitting and doubling down
+        if(split){
+          gameBet <- gameBet*2
+          #doubled down on both hands
+          if(doubledDownSplit&&doubledDown){
+            gameBet <- gameBet*4
+          } else if (doubledDownSplit || doubledDown){
+            #doubled down on one of the hands
+            gameBet <- gameBet*3
+          }
+        } else {
+          #not split, but could still double down
+          if(doubledDown){
+            gameBet <- gameBet*2
+          }
+        }
+      }
+    }
+
+    totalBet <- totalBet + gameBet
+
     if(split){
       if(dDown){
-        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
-        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
       } else{
-        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
-        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
       }
       results <- results+r
     } else{
       if(dDown){
-        r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T)
-        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
       } else {
-        r<-checkForWinner(unlist(p[1]),unlist(d[1]))
-        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]), tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), tc=tc)
       }
       results <- results+r
     }
     
     #deal first card of next game to player and dealer
-    p<-playerS1(deck[counter],T)
+    p<-playerS3(deck[counter],T)
+    countCard(deck[counter])
     counter <- counter + 1
     d<-dealer(deck[counter],T)
+    countCard(deck[counter])
     counter <- counter + 1
   }
   
@@ -1081,7 +1137,7 @@ s5 <- function(results,deck,terminate, strategy, cCards){
 #strategy = 6: base strategy
 #strategy = 12: doubling down
 #strategy = 18: splitting and doubling down
-s6 <- function(results, deck, terminate, strategy){
+s6 <- function(results, deck, terminate, strategy, cCards){
   #when dealer's up card is 3,4,5,6, S1
   #otherwise s2
   
@@ -1096,14 +1152,19 @@ s6 <- function(results, deck, terminate, strategy){
     pws=T
     dDown=T
   }
+
+  runningCount <<- 0
+  cardsDealt <<- 0
   
   totalBet<-0
   
   counter <- 1
   #deal first card to player and dealer
   p<-playerS6(deck[counter],T, T)
+  countCard(deck[counter])
   counter <- counter + 1
   d<-dealer(deck[counter],T)
+  countCard(deck[counter])
   counter <- counter + 1
   
   #flag for whether to use s1 or s2
@@ -1111,7 +1172,7 @@ s6 <- function(results, deck, terminate, strategy){
   
   #go through the deck, last game is with the termination card
   while(counter<=terminate){
-    totalBet <- totalBet +1
+    gameBet <- 1
     #split hand flag
     split=F
     splitWithAce=F
@@ -1123,8 +1184,9 @@ s6 <- function(results, deck, terminate, strategy){
       if(names(deck[counter])==names(p[[1]]) && p[[1]]!=5 && p[[1]]!=10){
         #split the deck
         split=T
-        totalBet <- totalBet +1
+        gameBet <- gameBet +1
         p2<-playerS6Split(deck[counter],T, F)
+        countCard(deck[counter])
         
         #check for aces
         if(names(deck[counter])=="A"){
@@ -1145,10 +1207,13 @@ s6 <- function(results, deck, terminate, strategy){
         
         #deal second card to player hands and dealer
         p<-playerS6(deck[counter],F, useS1)
+        countCard(deck[counter])
         counter <- counter + 1
         p2<-playerS6Split(deck[counter],F, useS1)
+        countCard(deck[counter])
         counter <- counter + 1
         d<-dealer(deck[counter],F)
+        countCard(deck[counter])
         counter <- counter + 1
         
       } else{
@@ -1163,8 +1228,10 @@ s6 <- function(results, deck, terminate, strategy){
         #no split, play normally
         #deal second card to player and dealer
         p<-playerS6(deck[counter],F, useS1)
+        countCard(deck[counter])
         counter <- counter + 1
         d<-dealer(deck[counter],F)
+        countCard(deck[counter])
         counter <- counter + 1
       }
     } else{
@@ -1179,8 +1246,10 @@ s6 <- function(results, deck, terminate, strategy){
       #not playing with splitting
       #deal second card to player and dealer
       p<-playerS6(deck[counter],F, useS1)
+      countCard(deck[counter])
       counter <- counter + 1
       d<-dealer(deck[counter],F)
+      countCard(deck[counter])
       counter <- counter + 1
     }
     #now have 2 cards in all hand(s)
@@ -1189,8 +1258,9 @@ s6 <- function(results, deck, terminate, strategy){
       #if the sum of the hand is 10 or 11, double the bet and only draw one card
       if(sum(p[[1]])==11 || sum(p[[1]])==10){
         #cat("doubled down: hand total",sum(p[[1]]),"\n")
-        totalBet <- totalBet + 1
+        gameBet <- gameBet*2
         p<-playerS6(deck[counter],F, useS1)
+        countCard(deck[counter])
         counter <- counter + 1
         doubledDown=T
       }
@@ -1198,8 +1268,13 @@ s6 <- function(results, deck, terminate, strategy){
       if(split){
         if(sum(p2[[1]])==11 || sum(p2[[1]])==10){
           #cat("doubled down on split hand: hand total",sum(p2[[1]]),"\n")
-          totalBet <- totalBet + 1
+          if(doubledDown){
+            gameBet <- (3/2)*gameBet
+          } else {
+            gameBet <- gameBet*2
+          }
           p2<-playerS6Split(deck[counter],F, useS1)
+          countCard(deck[counter])
           counter <- counter + 1
           doubledDownSplit=T
         }
@@ -1212,6 +1287,7 @@ s6 <- function(results, deck, terminate, strategy){
       if(!doubledDown){
         while(!(p[[2]])){
           p<-playerS6(deck[counter],F, useS1)
+          countCard(deck[counter])
           counter <- counter + 1
         }
       }
@@ -1220,6 +1296,7 @@ s6 <- function(results, deck, terminate, strategy){
         if(!doubledDownSplit){
           while(!(p2[[2]])){
             p2<-playerS6Split(deck[counter],F, useS1)
+            countCard(deck[counter])
             counter <- counter + 1
           }
         }
@@ -1229,33 +1306,71 @@ s6 <- function(results, deck, terminate, strategy){
     #finish hand of dealer
     while(!d[[2]]){
       d<-dealer(deck[counter],F)
+      countCard(deck[counter])
       counter <- counter + 1
     }
+
     #get the results of the game
+
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+    
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    if(!cCards){
+      #not playing with counting cards, set tc to -1
+      tc <- -1
+    } else {
+      #cat("true count: ",tc,"\n")
+      #update game bet, if necessary
+      if (tc>-1){
+        gameBet <- tc+2
+        #account for splitting and doubling down
+        if(split){
+          gameBet <- gameBet*2
+          #doubled down on both hands
+          if(doubledDownSplit&&doubledDown){
+            gameBet <- gameBet*4
+          } else if (doubledDownSplit || doubledDown){
+            #doubled down on one of the hands
+            gameBet <- gameBet*3
+          }
+        } else {
+          #not split, but could still double down
+          if(doubledDown){
+            gameBet <- gameBet*2
+          }
+        }
+      }
+    }
+
+    totalBet <- totalBet + gameBet
+
     if(split){
       if(dDown){
-        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
-        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], doublingdown=TRUE, tc=tc)
       } else{
-        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]])
-        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]])
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]),p2[[1]], tc=tc)
       }
       results <- results+r
     } else{
       if(dDown){
-        r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T)
-        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T)
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), doublingdown=T, tc=tc)
       } else {
-        r<-checkForWinner(unlist(p[1]),unlist(d[1]))
-        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]))
+        r<-checkForWinner(unlist(p[1]),unlist(d[1]), tc=tc)
+        #r<-checkForWinnerVerbose(unlist(p[1]),unlist(d[1]), tc=tc)
       }
       results <- results+r
     }
     
     #deal first card of next game to player and dealer
     p<-playerS6(deck[counter],T, T)
+    countCard(deck[counter])
     counter <- counter + 1
     d<-dealer(deck[counter],T)
+    countCard(deck[counter])
     counter <- counter + 1
   }
   
@@ -1297,13 +1412,13 @@ runSimulations <- function(x, cCards){
   } else if (x==2 || x==8 || x==14) {
     results <- s2(results,deck,terminate, x, cCards)
   } else if (x==3 || x==9 || x==15){
-    results <- s3(results,deck,terminate, x)
+    results <- s3(results,deck,terminate, x, cCards)
   }else if (x==4 || x==10 || x==16) {
     results <- s4(results,deck,terminate, x, cCards)
   } else if (x==5 || x==11 || x==17) {
     results <- s5(results,deck,terminate, x, cCards)
   } else if (x==6 || x==12 || x==18){
-    results <- s6(results, deck, terminate, x)
+    results <- s6(results, deck, terminate, x, cCards)
   }
   
   
@@ -1385,23 +1500,41 @@ names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","
 finalResults
 cat("\n")
 
-# cat("Running Strategy 3 \n")
-# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(3),FUN="+")))
-# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-# finalResults
-# cat("\n")
-# 
-# cat("Running Strategy 3 with Doubling Down \n")
-# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(9),FUN="+")))
-# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-# finalResults
-# cat("\n")
-# 
-# cat("Running Strategy 3 with Splitting and Doubling Down \n")
-# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(15),FUN="+")))
-# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-# finalResults
-# cat("\n")
+cat("Running Strategy 3 \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(3),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+  
+cat("Running Strategy 3 with Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(3, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 3 with Doubling Down \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(9),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 3 with Doubling Down and Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(9, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 3 with Splitting and Doubling Down \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(15),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 3 with Splitting and Doubling Down and Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(15, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
 
 cat("Running Strategy 4 \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(4),FUN="+")))
@@ -1475,21 +1608,41 @@ names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","
 finalResults
 cat("\n")
 
-# cat("Running Strategy 6 \n")
-# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(6),FUN="+")))
-# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-# finalResults
-# cat("\n")
-# 
-# cat("Running Strategy 6 with Doubling Down \n")
-# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(12),FUN="+")))
-# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-# finalResults
-# cat("\n")
-# 
-# cat("Running Strategy 6 with Splitting and Doubling Down \n")
-# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(18),FUN="+")))
-# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-# finalResults
-# cat("\n")
+cat("Running Strategy 6 \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(6),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 6 with Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(6, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 6 with Doubling Down \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(12),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 6 with Doubling Down and Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(12, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 6 with Splitting and Doubling Down \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(18),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 6 with Splitting and Doubling Down and Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(18, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+
 
