@@ -120,7 +120,11 @@ s1 <- function(results,deck,terminate, strategy, cCards){
       #cat("true count: ",tc,"\n")
       #update game bet, if necessary
       if (tc>-1){
-        gameBet <- tc+2
+        if(tc>8){
+          gameBet<-10
+        } else {
+          gameBet <- tc+2
+        }
       }
     }
     
@@ -300,6 +304,25 @@ s21 <- function(results,deck,terminate, strategy, cCards){
     splitWithAce=F
     doubledDown = F 
     doubledDownSplit = F 
+    
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+    
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    if(!cCards){
+      #not playing with counting cards, set tc to -1
+      tc <- -1
+    } else {
+      #cat("true count: ",tc,"\n")
+      #update game bet, if necessary
+      if (tc>-1){
+        if(tc>8){
+          gameBet<-10
+        } else {
+          gameBet <- tc+2
+        }
+      }
+    }
     
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
@@ -512,6 +535,25 @@ s2 <- function(results,deck,terminate, strategy, cCards){
     doubledDown = F 
     doubledDownSplit = F 
     
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+    
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    if(!cCards){
+      #not playing with counting cards, set tc to -1
+      tc <- -1
+    } else {
+      #cat("true count: ",tc,"\n")
+      #update game bet, if necessary
+      if (tc>-1){
+        if(tc>8){
+          gameBet<-10
+        } else {
+          gameBet <- tc+2
+        }
+      }
+    }
+    
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
       
@@ -619,36 +661,6 @@ s2 <- function(results,deck,terminate, strategy, cCards){
       d<-dealer(deck[counter],F)
       countCard(deck[counter])
       counter <- counter + 1
-    }
-    
-    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
-    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
-    
-    #if tc is negative, best $1 as usual, otherwise bet $tc+2
-    if(!cCards) {
-      tc <- -1
-    } else {
-      #cat("true count: ", tc, "\n")
-      #update game bet if necessary
-      if(tc > -1) {
-        gameBet < tc+2
-        #account for splitting and doubling down
-        if(split) {
-          gameBet <- gameBet*2
-          #doubled down on both hands
-          if(doubledDownSplit&&doubledDown) {
-            gameBet <- gameBet*4
-          } else if(doubledDownSplit || doubledDown) {
-            #doubled down on just one hand
-            gameBet <- gameBet*3
-          }
-        } else {
-          #not split, but could still double down
-          if(doubledDown) {
-            gameBet <- gameBet*2
-          }
-        }
-      }
     }
     
     totalBet <- totalBet + gameBet
