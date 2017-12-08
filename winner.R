@@ -14,8 +14,8 @@ checkForWinner<-function(playerCards,dealerCards,splitPlayerCards, doublingdown,
   #set flags
   pBust <- sum(playerCards)>21
   dBust <- sum(dealerCards)>21
-  pBlackjack <- sum(playerCards)==21
-  dBlackjack <- sum(dealerCards)==21
+  pBlackjack <- (sum(playerCards)==21 && length(playerCards)==2)
+  dBlackjack <- (sum(dealerCards)==21 && length(dealerCards)==2)
 
   if(missing(doublingdown)){
   	doublingdown=FALSE
