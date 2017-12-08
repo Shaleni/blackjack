@@ -1,8 +1,8 @@
 #blackjackSimulator.R
 #version of blackjack.R that uses different files for the functions
 
-setwd("C:/Users/shale_000/Documents/SMU/Fall2017/STAT 6324/blackjack")
-#setwd("/Users/quincyschurr/Documents/blackjack")
+#setwd("C:/Users/shale_000/Documents/SMU/Fall2017/STAT 6324/blackjack")
+setwd("/Users/quincyschurr/Documents/blackjack")
 
 ######################
 ##Constant Functions##
@@ -109,6 +109,43 @@ s1 <- function(results,deck,terminate, strategy, cCards){
     doubledDown = F 
     doubledDownSplit = F 
     
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+    
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    ##########
+    #custom strategy
+    ##########
+    # if(!cCards){
+    #   #not playing with counting cards, set tc to -1
+    #   tc <- -1
+    # } else {
+    #   #cat("true count: ",tc,"\n")
+    #   #update game bet, if necessary
+    #   if (tc>-1){
+    #     if(tc>8){
+    #       gameBet<-10
+    #     } else {
+    #       gameBet <- tc+2
+    #     }
+    #   }
+    # }
+    
+    ############
+    #base strategy
+    ############
+    if(!cCards){
+       #not playing with counting cards, set tc to -1
+       tc <- -1
+     } else {
+       #cat("true count: ",tc,"\n")
+       #update game bet, if necessary
+       if (tc>-1){
+         gameBet <- tc+2
+       }
+     }
+    
+    
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
       
@@ -213,37 +250,6 @@ s1 <- function(results,deck,terminate, strategy, cCards){
       counter <- counter + 1
     }
     #get the results of the game
-    
-    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
-    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
-    
-    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
-    if(!cCards){
-      #not playing with counting cards, set tc to -1
-      tc <- -1
-    } else {
-      #cat("true count: ",tc,"\n")
-      #update game bet, if necessary
-      if (tc>-1){
-        gameBet <- tc+2
-        #account for splitting and doubling down
-        if(split){
-          gameBet <- gameBet*2
-          #doubled down on both hands
-          if(doubledDownSplit&&doubledDown){
-            gameBet <- gameBet*4
-          } else if (doubledDownSplit || doubledDown){
-            #doubled down on one of the hands
-            gameBet <- gameBet*3
-          }
-        } else {
-          #not split, but could still double down
-          if(doubledDown){
-            gameBet <- gameBet*2
-          }
-        }
-      }
-    }
 
     totalBet <- totalBet + gameBet
     
@@ -304,11 +310,11 @@ s2 <- function(results,deck,terminate, strategy, cCards){
   
   #deal first card to player and dealer
   p<-playerS2(deck[counter],T)
-  counter <- counter + 1
   countCard(deck[counter])
+  counter <- counter + 1
   dealer(deck[counter],T)
-  counter <- counter + 1
   countCard(deck[counter])
+  counter <- counter + 1
   
   #go through the deck, last game is with the termination card
   while(counter<=terminate){
@@ -318,6 +324,43 @@ s2 <- function(results,deck,terminate, strategy, cCards){
     splitWithAce=F
     doubledDown = F 
     doubledDownSplit = F 
+    
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+    
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    ##########
+    #custom strategy
+    ##########
+    if(!cCards){
+      #not playing with counting cards, set tc to -1
+      tc <- -1
+    } else {
+      #cat("true count: ",tc,"\n")
+      #update game bet, if necessary
+      if (tc>-1){
+        if(tc>8){
+          gameBet<-10
+        } else {
+          gameBet <- tc+2
+        }
+      }
+    }
+    
+    ############
+    #base strategy
+    ############
+    # if(!cCards){
+    #   #not playing with counting cards, set tc to -1
+    #   tc <- -1
+    # } else {
+    #   #cat("true count: ",tc,"\n")
+    #   #update game bet, if necessary
+    #   if (tc>-1){
+    #     gameBet <- tc+2
+    #   }
+    # }
+    
     
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
@@ -375,7 +418,7 @@ s2 <- function(results,deck,terminate, strategy, cCards){
       #if the sum of the hand is 10 or 11, double the bet and only draw one card
       if(sum(p[[1]])==11 || sum(p[[1]])==10){
         #cat("doubled down: hand total",sum(p[[1]]),"\n")
-        gameBet <- gameBet + 1
+        gameBet <- gameBet * 2
         p<-playerS2(deck[counter],F)
         countCard(deck[counter])
         counter <- counter + 1
@@ -426,36 +469,6 @@ s2 <- function(results,deck,terminate, strategy, cCards){
       d<-dealer(deck[counter],F)
       countCard(deck[counter])
       counter <- counter + 1
-    }
-    
-    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
-    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
-    
-    #if tc is negative, best $1 as usual, otherwise bet $tc+2
-    if(!cCards) {
-      tc <- -1
-    } else {
-      #cat("true count: ", tc, "\n")
-      #update game bet if necessary
-      if(tc > -1) {
-        gameBet < tc+2
-        #account for splitting and doubling down
-        if(split) {
-          gameBet <- gameBet*2
-          #doubled down on both hands
-          if(doubledDownSplit&&doubledDown) {
-            gameBet <- gameBet*4
-          } else if(doubledDownSplit || doubledDown) {
-            #doubled down on just one hand
-            gameBet <- gameBet*3
-          }
-        } else {
-          #not split, but could still double down
-          if(doubledDown) {
-            gameBet <- gameBet*2
-          }
-        }
-      }
     }
     
     totalBet <- totalBet + gameBet
@@ -533,6 +546,43 @@ s3 <- function(results,deck,terminate,strategy, cCards){
     splitWithAce=F
     doubledDown = F
     doubledDownSplit = F
+    
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+    
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    ##########
+    #custom strategy
+    ##########
+    if(!cCards){
+      #not playing with counting cards, set tc to -1
+      tc <- -1
+    } else {
+      #cat("true count: ",tc,"\n")
+      #update game bet, if necessary
+      if (tc>-1){
+        if(tc>8){
+          gameBet<-10
+        } else {
+          gameBet <- tc+2
+        }
+      }
+    }
+    
+    ############
+    #base strategy
+    ############
+    # if(!cCards){
+    #   #not playing with counting cards, set tc to -1
+    #   tc <- -1
+    # } else {
+    #   #cat("true count: ",tc,"\n")
+    #   #update game bet, if necessary
+    #   if (tc>-1){
+    #     gameBet <- tc+2
+    #   }
+    # }
+    
     
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
@@ -640,36 +690,6 @@ s3 <- function(results,deck,terminate,strategy, cCards){
       counter <- counter + 1
     }
     #get the results of the game
-    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
-    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
-
-    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
-    if(!cCards){
-      #not playing with counting cards, set tc to -1
-      tc <- -1
-    } else {
-      #cat("true count: ",tc,"\n")
-      #update game bet, if necessary
-      if (tc>-1){
-        gameBet <- tc+2
-        #account for splitting and doubling down
-        if(split){
-          gameBet <- gameBet*2
-          #doubled down on both hands
-          if(doubledDownSplit&&doubledDown){
-            gameBet <- gameBet*4
-          } else if (doubledDownSplit || doubledDown){
-            #doubled down on one of the hands
-            gameBet <- gameBet*3
-          }
-        } else {
-          #not split, but could still double down
-          if(doubledDown){
-            gameBet <- gameBet*2
-          }
-        }
-      }
-    }
 
     totalBet <- totalBet + gameBet
 
@@ -730,11 +750,11 @@ s4 <- function(results,deck,terminate, strategy, cCards){
   
   #deal first card to player and dealer
   p<-playerS4(deck[counter],T)
-  counter <- counter + 1
   countCard(deck[counter])
+  counter <- counter + 1
   dealer(deck[counter],T)
-  counter <- counter + 1
   countCard(deck[counter])
+  counter <- counter + 1
   
   #go through the deck, last game is with the termination card
   while(counter<=terminate){
@@ -744,6 +764,43 @@ s4 <- function(results,deck,terminate, strategy, cCards){
     splitWithAce=F
     doubledDown = F 
     doubledDownSplit = F 
+    
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+    
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    ##########
+    #custom strategy
+    ##########
+    if(!cCards){
+      #not playing with counting cards, set tc to -1
+      tc <- -1
+    } else {
+      #cat("true count: ",tc,"\n")
+      #update game bet, if necessary
+      if (tc>-1){
+        if(tc>8){
+          gameBet<-10
+        } else {
+          gameBet <- tc+2
+        }
+      }
+    }
+    
+    ############
+    #base strategy
+    ############
+    # if(!cCards){
+    #   #not playing with counting cards, set tc to -1
+    #   tc <- -1
+    # } else {
+    #   #cat("true count: ",tc,"\n")
+    #   #update game bet, if necessary
+    #   if (tc>-1){
+    #     gameBet <- tc+2
+    #   }
+    # }
+    
     
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
@@ -801,7 +858,7 @@ s4 <- function(results,deck,terminate, strategy, cCards){
       #if the sum of the hand is 10 or 11, double the bet and only draw one card
       if(sum(p[[1]])==11 || sum(p[[1]])==10){
         #cat("doubled down: hand total",sum(p[[1]]),"\n")
-        gameBet <- gameBet + 1
+        gameBet <- gameBet * 2
         p<-playerS4(deck[counter],F)
         countCard(deck[counter])
         counter <- counter + 1
@@ -852,36 +909,6 @@ s4 <- function(results,deck,terminate, strategy, cCards){
       d<-dealer(deck[counter],F)
       countCard(deck[counter])
       counter <- counter + 1
-    }
-    
-    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
-    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
-    
-    #if tc is negative, best $1 as usual, otherwise bet $tc+2
-    if(!cCards) {
-      tc <- -1
-    } else {
-      #cat("true count: ", tc, "\n")
-      #update game bet if necessary
-      if(tc > -1) {
-        gameBet < tc+2
-        #account for splitting and doubling down
-        if(split) {
-          gameBet <- gameBet*2
-          #doubled down on both hands
-          if(doubledDownSplit&&doubledDown) {
-            gameBet <- gameBet*4
-          } else if(doubledDownSplit || doubledDown) {
-            #doubled down on just one hand
-            gameBet <- gameBet*3
-          }
-        } else {
-          #not split, but could still double down
-          if(doubledDown) {
-            gameBet <- gameBet*2
-          }
-        }
-      }
     }
     
     totalBet <- totalBet + gameBet
@@ -944,11 +971,11 @@ s5 <- function(results,deck,terminate, strategy, cCards){
   
   #deal first card to player and dealer
   p<-playerS5(deck[counter],T)
-  counter <- counter + 1
   countCard(deck[counter])
+  counter <- counter + 1
   dealer(deck[counter],T)
-  counter <- counter + 1
   countCard(deck[counter])
+  counter <- counter + 1
   
   #go through the deck, last game is with the termination card
   while(counter<=terminate){
@@ -958,6 +985,42 @@ s5 <- function(results,deck,terminate, strategy, cCards){
     splitWithAce=F
     doubledDown = F 
     doubledDownSplit = F 
+    
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+    
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    ##########
+    #custom strategy
+    ##########
+    if(!cCards){
+      #not playing with counting cards, set tc to -1
+      tc <- -1
+    } else {
+      #cat("true count: ",tc,"\n")
+      #update game bet, if necessary
+      if (tc>-1){
+        if(tc>8){
+          gameBet<-10
+        } else {
+          gameBet <- tc+2
+        }
+      }
+    }
+    
+    ############
+    #base strategy
+    ############
+    # if(!cCards){
+    #   #not playing with counting cards, set tc to -1
+    #   tc <- -1
+    # } else {
+    #   #cat("true count: ",tc,"\n")
+    #   #update game bet, if necessary
+    #   if (tc>-1){
+    #     gameBet <- tc+2
+    #   }
+    # }
     
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
@@ -1015,7 +1078,7 @@ s5 <- function(results,deck,terminate, strategy, cCards){
       #if the sum of the hand is 10 or 11, double the bet and only draw one card
       if(sum(p[[1]])==11 || sum(p[[1]])==10){
         #cat("doubled down: hand total",sum(p[[1]]),"\n")
-        gameBet <- gameBet + 1
+        gameBet <- gameBet * 2
         p<-playerS5(deck[counter],F)
         countCard(deck[counter])
         counter <- counter + 1
@@ -1066,36 +1129,6 @@ s5 <- function(results,deck,terminate, strategy, cCards){
       d<-dealer(deck[counter],F)
       countCard(deck[counter])
       counter <- counter + 1
-    }
-    
-    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
-    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
-    
-    #if tc is negative, best $1 as usual, otherwise bet $tc+2
-    if(!cCards) {
-      tc <- -1
-    } else {
-      #cat("true count: ", tc, "\n")
-      #update game bet if necessary
-      if(tc > -1) {
-        gameBet < tc+2
-        #account for splitting and doubling down
-        if(split) {
-          gameBet <- gameBet*2
-          #doubled down on both hands
-          if(doubledDownSplit&&doubledDown) {
-            gameBet <- gameBet*4
-          } else if(doubledDownSplit || doubledDown) {
-            #doubled down on just one hand
-            gameBet <- gameBet*3
-          }
-        } else {
-          #not split, but could still double down
-          if(doubledDown) {
-            gameBet <- gameBet*2
-          }
-        }
-      }
     }
     
     totalBet <- totalBet + gameBet
@@ -1178,6 +1211,43 @@ s6 <- function(results, deck, terminate, strategy, cCards){
     splitWithAce=F
     doubledDown = F
     doubledDownSplit = F
+    
+    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
+    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
+    
+    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
+    ##########
+    #custom strategy
+    ##########
+    # if(!cCards){
+    #   #not playing with counting cards, set tc to -1
+    #   tc <- -1
+    # } else {
+    #   #cat("true count: ",tc,"\n")
+    #   #update game bet, if necessary
+    #   if (tc>-1){
+    #     if(tc>8){
+    #       gameBet<-10
+    #     } else {
+    #       gameBet <- tc+2
+    #     }
+    #   }
+    # }
+    
+    ############
+    #base strategy
+    ############
+    if(!cCards){
+      #not playing with counting cards, set tc to -1
+      tc <- -1
+    } else {
+      #cat("true count: ",tc,"\n")
+      #update game bet, if necessary
+      if (tc>-1){
+        gameBet <- tc+2
+      }
+    }
+    
     #if playing with a split hand, check next card for possible split before dealing it
     if(pws){
       
@@ -1312,37 +1382,6 @@ s6 <- function(results, deck, terminate, strategy, cCards){
 
     #get the results of the game
 
-    #calculate "True Count" = runningTotal/trunc((312-cardsDealt)/52)
-    tc <- ceiling(runningCount/trunc((312-cardsDealt)/52))
-    
-    #if tc is negative, bet $1 as usual. otherwise bet $tc+2
-    if(!cCards){
-      #not playing with counting cards, set tc to -1
-      tc <- -1
-    } else {
-      #cat("true count: ",tc,"\n")
-      #update game bet, if necessary
-      if (tc>-1){
-        gameBet <- tc+2
-        #account for splitting and doubling down
-        if(split){
-          gameBet <- gameBet*2
-          #doubled down on both hands
-          if(doubledDownSplit&&doubledDown){
-            gameBet <- gameBet*4
-          } else if (doubledDownSplit || doubledDown){
-            #doubled down on one of the hands
-            gameBet <- gameBet*3
-          }
-        } else {
-          #not split, but could still double down
-          if(doubledDown){
-            gameBet <- gameBet*2
-          }
-        }
-      }
-    }
-
     totalBet <- totalBet + gameBet
 
     if(split){
@@ -1377,7 +1416,6 @@ s6 <- function(results, deck, terminate, strategy, cCards){
   results[6] <- totalBet
   return(results)
 }
-
 
 #######################
 ##Running Simulations##
@@ -1428,47 +1466,130 @@ runSimulations <- function(x, cCards){
 simRun <- 100000
 
 
-cat("Running Strategy 1 \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(1),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
+# cat("Running Strategy 1 \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(1),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 2 \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(2),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 3 \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(3),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 4 \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(4),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 5 \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(5),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 6 \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(6),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# 
+# 
+# 
+# cat("Running Strategy 1 with Doubling Down \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(7),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 2 with Doubling Down \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(8),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 3 with Doubling Down \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(9),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 4 with Doubling Down \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(10),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 5 with Doubling Down \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(11),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 6 with Doubling Down \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(12),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# 
+# 
+# 
+# 
+# cat("Running Strategy 1 with Splitting and Doubling Down \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(13),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 2 with Doubling Down & Splitting \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(14),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 3 with Splitting and Doubling Down \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(15),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 4 with Doubling Down & Splitting \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(16),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 5 with Doubling Down & Splitting \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(17),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+# 
+# cat("Running Strategy 6 with Splitting and Doubling Down \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(18),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
 
-cat("Running Strategy 1 with Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(1, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
 
-cat("Running Strategy 1 with Doubling Down \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(7),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
 
-cat("Running Strategy 1 with Doubling Down and Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(7, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
 
-cat("Running Strategy 1 with Splitting and Doubling Down \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(13),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
 
-cat("Running Strategy 1 with Splitting, Doubling Down, and Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(13, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 2 \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(2),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
+# cat("Running Strategy 1 with Counting Cards \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(1, T),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
 
 cat("Running Strategy 2 with Counting Cards \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(2, T),FUN="+")))
@@ -1476,68 +1597,8 @@ names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","
 finalResults
 cat("\n")
 
-cat("Running Strategy 2 with Doubling Down \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(8),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 2 with Doubling Down and Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(8, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 2 with Doubling Down & Splitting \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(14),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 2 with Splitting, Doubling Down, and Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(14, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 3 \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(3),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-  
 cat("Running Strategy 3 with Counting Cards \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(3, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 3 with Doubling Down \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(9),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 3 with Doubling Down and Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(9, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 3 with Splitting and Doubling Down \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(15),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 3 with Splitting and Doubling Down and Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(15, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 4 \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(4),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")
@@ -1548,8 +1609,35 @@ names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","
 finalResults
 cat("\n")
 
-cat("Running Strategy 4 with Doubling Down \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(10),FUN="+")))
+cat("Running Strategy 5 with Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(5, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+# cat("Running Strategy 6 with Counting Cards \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(6, T),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+
+
+
+
+# cat("Running Strategy 1 with Doubling Down and Counting Cards \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(7, T),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+
+cat("Running Strategy 2 with Doubling Down and Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(8, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 3 with Doubling Down and Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(9, T),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")
@@ -1560,8 +1648,35 @@ names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","
 finalResults
 cat("\n")
 
-cat("Running Strategy 4 with Doubling Down & Splitting \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(16),FUN="+")))
+cat("Running Strategy 5 with Doubling Down and Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(11, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+# cat("Running Strategy 6 with Doubling Down and Counting Cards \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(12, T),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+
+
+
+
+# cat("Running Strategy 1 with Splitting, Doubling Down, and Counting Cards \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(13, T),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
+
+cat("Running Strategy 2 with Splitting, Doubling Down, and Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(14, T),FUN="+")))
+names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+finalResults
+cat("\n")
+
+cat("Running Strategy 3 with Splitting and Doubling Down and Counting Cards \n")
+finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(15, T),FUN="+")))
 names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
 finalResults
 cat("\n")
@@ -1572,35 +1687,6 @@ names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","
 finalResults
 cat("\n")
 
-cat("Running Strategy 5 \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(5),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 5 with Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(5, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 5 with Doubling Down \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(11),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 5 with Doubling Down and Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(11, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 5 with Doubling Down & Splitting \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(17),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
 
 cat("Running Strategy 5 with Splitting, Doubling Down, and Counting Cards \n")
 finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(17, T),FUN="+")))
@@ -1608,41 +1694,14 @@ names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","
 finalResults
 cat("\n")
 
-cat("Running Strategy 6 \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(6),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
+# cat("Running Strategy 6 with Splitting and Doubling Down and Counting Cards \n")
+# finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(18, T),FUN="+")))
+# names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
+# finalResults
+# cat("\n")
 
-cat("Running Strategy 6 with Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(6, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
 
-cat("Running Strategy 6 with Doubling Down \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(12),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
 
-cat("Running Strategy 6 with Doubling Down and Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(12, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 6 with Splitting and Doubling Down \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(18),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
-
-cat("Running Strategy 6 with Splitting and Doubling Down and Counting Cards \n")
-finalResults <- rowSums(sapply(1:simRun,function(i) sapply(X=runSimulations(18, T),FUN="+")))
-names(finalResults) <- c("BlackJack","OtherWin","Tie","Loss","Bust","TotalBet","AmtLeft")
-finalResults
-cat("\n")
 
 
 
